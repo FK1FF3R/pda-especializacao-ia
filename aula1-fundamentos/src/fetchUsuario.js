@@ -4,12 +4,19 @@
 // A função recebe um `fetchFn` pra facilitar teste (injeção de dependência).
 
 export async function fetchUsuario(id, fetchFn = fetch) {
+  if (!Number.isInteger(id) || id < 0) {
+    throw new TypeError(`fetchUsuario espera um id inteiro >= 0, recebeu: ${id}`);
+  }
+
   const resposta = await fetchFn(`https://api.exemplo.com/usuarios/${id}`);
+  if (!resposta.ok) {
+    throw new Error(`Falha ao buscar usuário ${id}: status ${resposta.status}`);
+  }
   const dados = await resposta.json();
 
   return {
     id: dados.id,
-    nome: dados.nome.trim(),
-    email: dados.email.toLowerCase(),
+    nome: (dados.nome ?? '').trim(),
+    email: (dados.email ?? '').toLowerCase(),
   };
 }
